@@ -31,122 +31,135 @@ using std::vector;
 
 
 // Test many corner cases of Path::basename.
-TEST_TEMP_DISABLED_ON_WINDOWS(PathTest, Basename)
+TEST(PathTest, Basename)
 {
+  const string PATH_SEPARATOR = stringify(os::PATH_SEPARATOR);
+
   // Empty path check.
   EXPECT_EQ(".", Path("").basename());
 
   // Check common path patterns.
-  EXPECT_EQ("/", Path("/").basename());
   EXPECT_EQ(".", Path(".").basename());
   EXPECT_EQ("..", Path("..").basename());
-
   EXPECT_EQ("a", Path("a").basename());
-  EXPECT_EQ("b", Path("a/b").basename());
-  EXPECT_EQ("c", Path("a/b/c").basename());
+
+  // Check common path patterns.
+  EXPECT_EQ(PATH_SEPARATOR, Path(path::join("", "")).basename());
+  EXPECT_EQ("b", Path(path::join("a", "b")).basename());
+  EXPECT_EQ("c", Path(path::join("a", "b", "c")).basename());
 
   // Check leading slashes get cleaned up properly.
-  EXPECT_EQ("a", Path("/a").basename());
-  EXPECT_EQ("a", Path("//a").basename());
-  EXPECT_EQ("a", Path("/a/").basename());
-  EXPECT_EQ("c", Path("/a/b/c").basename());
-  EXPECT_EQ("b", Path("/a/b").basename());
-  EXPECT_EQ("b", Path("//a//b").basename());
+  EXPECT_EQ("a", Path(path::join("", "a")).basename());
+  EXPECT_EQ("a", Path(path::join("", "a")).basename());
+  EXPECT_EQ("a", Path(path::join("", "a", "")).basename());
+  EXPECT_EQ("c", Path(path::join("", "a", "b", "c")).basename());
+  EXPECT_EQ("b", Path(path::join("", "a", "b")).basename());
+  EXPECT_EQ("b", Path(path::join("", "", "a", "", "b")).basename());
 
   // Check trailing slashes get cleaned up properly.
-  EXPECT_EQ("a", Path("a/").basename());
-  EXPECT_EQ("c", Path("/a/b/c//").basename());
-  EXPECT_EQ("c", Path("/a/b/c///").basename());
-  EXPECT_EQ("/", Path("//").basename());
-  EXPECT_EQ("/", Path("///").basename());
+  EXPECT_EQ("a", Path(path::join("a", "")).basename());
+  EXPECT_EQ("c", Path(path::join("", "a", "b", "c", "", "")).basename());
+  EXPECT_EQ("c", Path(path::join("", "a", "b", "c", "", "", "")).basename());
+  EXPECT_EQ(PATH_SEPARATOR, Path(path::join("", "", "")).basename());
+  EXPECT_EQ(PATH_SEPARATOR, Path(path::join("", "", "", "")).basename());
 }
 
 
+
 // Test many corner cases of Path::dirname.
-TEST_TEMP_DISABLED_ON_WINDOWS(PathTest, Dirname)
+TEST(PathTest, Dirname)
 {
+  const string sep = stringify(os::PATH_SEPARATOR);
+  
   // Empty path check.
   EXPECT_EQ(".", Path("").dirname());
 
   // Check common path patterns.
-  EXPECT_EQ("/", Path("/").dirname());
+  EXPECT_EQ(".", Path(".").dirname());
+  EXPECT_EQ(".", Path("..").dirname());
+  EXPECT_EQ(".", Path("a").dirname());
+
+  // Check common path patterns.
+  EXPECT_EQ(sep, Path(sep).dirname());
   EXPECT_EQ(".", Path(".").dirname());
   EXPECT_EQ(".", Path("..").dirname());
 
   EXPECT_EQ(".", Path("a").dirname());
-  EXPECT_EQ("a", Path("a/b").dirname());
-  EXPECT_EQ("a/b", Path("a/b/c/").dirname());
+  EXPECT_EQ("a", Path(path::join("a", "b")).dirname());
+  EXPECT_EQ(path::join("a", "b"), Path(path::join("a", "b", "c")).dirname());
 
   // Check leading slashes get cleaned up properly.
-  EXPECT_EQ("/", Path("/a").dirname());
-  EXPECT_EQ("/", Path("//a").dirname());
-  EXPECT_EQ("/", Path("/a/").dirname());
-  EXPECT_EQ("/a", Path("/a/b").dirname());
-  EXPECT_EQ("//a", Path("//a//b").dirname());
-  EXPECT_EQ("/a/b", Path("/a/b/c").dirname());
-
+  EXPECT_EQ(sep, Path(path::join("", "a")).dirname());
+  EXPECT_EQ(sep, Path(path::join(sep, "a")).dirname());
+  EXPECT_EQ(sep, Path(path::join("", "a", "")).dirname());
+  EXPECT_EQ(path::join("", "a"), Path(path::join("", "a", "b")).dirname());
+  EXPECT_EQ(path::join(sep, "a"), Path(path::join(sep, "a", "", "b")).dirname());
+  EXPECT_EQ(path::join(sep, "a", "b"), Path(path::join("", "a", "b", "c")).dirname());
   // Check intermittent slashes get handled just like ::dirname does.
-  EXPECT_EQ("/a//b", Path("/a//b//c//").dirname());
-  EXPECT_EQ("//a/b", Path("//a/b//c").dirname());
+  EXPECT_EQ(path::join("", "a", "", "b"), Path(path::join("", "a", "", "b", "", "c", sep)).dirname());
+  EXPECT_EQ(path::join(sep, "a", "b"), Path(path::join(sep, "a", "b", "", "c")).dirname());
 
   // Check trailing slashes get cleaned up properly.
-  EXPECT_EQ(".", Path("a/").dirname());
-  EXPECT_EQ("a/b", Path("a/b/c").dirname());
-  EXPECT_EQ("/a/b", Path("/a/b/c/").dirname());
-  EXPECT_EQ("/a/b", Path("/a/b/c//").dirname());
-  EXPECT_EQ("/a/b", Path("/a/b/c///").dirname());
-  EXPECT_EQ("/", Path("//").dirname());
-  EXPECT_EQ("/", Path("///").dirname());
+  EXPECT_EQ(".", Path(path::join("a", "")).dirname());
+  EXPECT_EQ(path::join("a", "b"), Path(path::join("a", "b", "c")).dirname());
+  EXPECT_EQ(path::join("", "a", "b"), Path(path::join("", "a", "b", "c", "")).dirname());
+  EXPECT_EQ(path::join("", "a", "b"), Path(path::join("", "a", "b", "c", sep)).dirname());
+  EXPECT_EQ(path::join("", "a", "b"), Path(path::join("", "a", "b", "c", sep, "")).dirname());
+  EXPECT_EQ(sep, Path(path::join("", sep)).dirname());
+  EXPECT_EQ(sep, Path(path::join("", sep, "")).dirname());
 }
 
 
-TEST_TEMP_DISABLED_ON_WINDOWS(PathTest, Extension)
+TEST(PathTest, Extension)
 {
+  const string sep = stringify(os::PATH_SEPARATOR);
   EXPECT_NONE(Path(".").extension());
   EXPECT_NONE(Path("..").extension());
-
   EXPECT_NONE(Path("a").extension());
-  EXPECT_NONE(Path("/a").extension());
-  EXPECT_NONE(Path("/").extension());
 
-  EXPECT_NONE(Path("/a.b/c").extension());
+  EXPECT_NONE(Path(path::join("", "a")).extension());
+  EXPECT_NONE(Path(sep).extension());
+
+  EXPECT_NONE(Path(path::join("", "a.b", "c")).extension());
 
   EXPECT_SOME_EQ(".txt", Path("a.txt").extension());
-  EXPECT_SOME_EQ(".txt", Path("/a/b.txt").extension());
-  EXPECT_SOME_EQ(".txt", Path("/a.b/c.txt").extension());
+  EXPECT_SOME_EQ(".txt", Path(path::join("", "a", "b.txt")).extension());
+  EXPECT_SOME_EQ(".txt", Path(path::join("", "a.b", "c.txt")).extension());
 
   EXPECT_SOME_EQ(".gz", Path("a.tar.gz").extension());
-  EXPECT_SOME_EQ(".gz", Path("/a.tar.gz").extension());
+  EXPECT_SOME_EQ(".gz", Path(path::join("", "a.tar.gz")).extension());
 
   EXPECT_SOME_EQ(".bashrc", Path(".bashrc").extension());
-  EXPECT_SOME_EQ(".bashrc", Path("/.bashrc").extension());
+  EXPECT_SOME_EQ(".bashrc", Path(path::join("", ".bashrc")).extension());
 }
 
 
-TEST_TEMP_DISABLED_ON_WINDOWS(PathTest, Join)
+TEST(PathTest, Join)
 {
-  EXPECT_EQ("a/b/c", path::join("a", "b", "c"));
-  EXPECT_EQ("/a/b/c", path::join("/a", "b", "c"));
+  const string sep = stringify(os::PATH_SEPARATOR);
+
+  EXPECT_EQ("a" + sep + "b" + sep + "c", path::join("a", "b", "c"));
+  EXPECT_EQ(sep + "a" + sep + "b" + sep + "c", path::join(sep + "a", "b", "c"));
 
   EXPECT_EQ("", path::join(vector<string>()));
-  EXPECT_EQ("a/b/c", path::join(vector<string>({"a", "b", "c"})));
+  EXPECT_EQ("a" + sep + "b" + sep + "c", path::join(vector<string>({"a", "b", "c"})));
 
   // TODO(cmaloney): This should join to ""
-  EXPECT_EQ("/", path::join(vector<string>({"", "", ""})));
+  EXPECT_EQ(sep, path::join(vector<string>({"", "", ""})));
 
   // Interesting corner cases around being the first, middle, last.
-  EXPECT_EQ("/asdf", path::join("/", "asdf"));
-  EXPECT_EQ("/", path::join("", "/", ""));
-  EXPECT_EQ("ab/", path::join("ab/", "", "/"));
-  EXPECT_EQ("/ab", path::join("/", "/", "ab"));
-  EXPECT_EQ("ab/", path::join("ab", "/", "/"));
-  EXPECT_EQ("/ab", path::join("/", "", "/ab"));
+  EXPECT_EQ(sep + "asdf", path::join(sep, "asdf"));
+  EXPECT_EQ(sep, path::join("", sep, ""));
+  EXPECT_EQ("ab" + sep, path::join("ab" + sep, "", sep));
+  EXPECT_EQ(sep + "ab", path::join(sep, sep, "ab"));
+  EXPECT_EQ("ab" + sep, path::join("ab", sep, sep));
+  EXPECT_EQ(sep + "ab", path::join(sep, "", sep + "ab"));
 
   // Check trailing and leading slashes get cleaned up.
-  EXPECT_EQ("a/b/c/", path::join("a/", "b/", "c/"));
-  EXPECT_EQ("/a/b/c", path::join("/a", "/b", "/c"));
-  EXPECT_EQ("/a/b/c/", path::join("/a/", "/b/", "/c/"));
-  EXPECT_EQ("a/b/c/", path::join("a/", "/b/", "/c/"));
+  EXPECT_EQ("a" + sep + "b" + sep + "c" + sep, path::join("a" + sep, "b" + sep, "c" + sep));
+  EXPECT_EQ(sep + "a" + sep + "b" + sep + "c", path::join(sep + "a", sep + "b", sep + "c"));
+  EXPECT_EQ(sep + "a" + sep + "b" + sep + "c" + sep, path::join(sep + "a" + sep, sep + "b" + sep, sep + "c" + sep));
+  EXPECT_EQ("a" + sep + "b" + sep + "c" + sep, path::join("a" + sep, sep + "b" + sep, sep + "c" + sep));
 }
 
 
