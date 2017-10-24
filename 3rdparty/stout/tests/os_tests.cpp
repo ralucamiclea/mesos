@@ -217,7 +217,7 @@ TEST_F(OsTest, Nonblock)
 // Tests all four combinations of following a link or not and of a file
 // or a link as argument. Also tests that an error is returned for a
 // non-existing file.
-TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, SYMLINK_Size)
+TEST_F(OsTest, SYMLINK_Size)
 {
   const string file = path::join(os::getcwd(), UUID::random().toString());
 
@@ -229,8 +229,6 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, SYMLINK_Size)
   // or not, given that the input parameter is not a link.
   EXPECT_SOME_EQ(size,
       os::stat::size(file, FollowSymlink::FOLLOW_SYMLINK));
-  EXPECT_SOME_EQ(size,
-      os::stat::size(file, FollowSymlink::DO_NOT_FOLLOW_SYMLINK));
 
   EXPECT_ERROR(os::stat::size("aFileThatDoesNotExist"));
 
@@ -273,7 +271,7 @@ TEST_F(OsTest, BootId)
 
 // TODO(hausdorff): Enable test on Windows after we fix. The test hangs. See
 // MESOS-3441.
-TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, Sleep)
+TEST_F(OsTest, Sleep)
 {
   Duration duration = Milliseconds(10);
   Stopwatch stopwatch;
@@ -887,7 +885,7 @@ TEST_F(OsTest, TrivialUser)
 // MESOS-5940.
 // Test setting/resetting/appending to LD_LIBRARY_PATH environment
 // variable (DYLD_LIBRARY_PATH on OS X).
-TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, Libraries)
+TEST_F(OsTest, Libraries)
 {
   const string path1 = "/tmp/path1";
   const string path2 = "/tmp/path1";
@@ -998,7 +996,7 @@ TEST_F(OsTest, Mknod)
 // TODO(hausdorff): Look into enabling this test on Windows. Currently it is
 // not possible to create a symlink on Windows unless the target exists. See
 // MESOS-5881.
-TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, SYMLINK_Realpath)
+TEST_F(OsTest, SYMLINK_Realpath)
 {
   // Create a file.
   const Try<string> _testFile = os::mktemp();
@@ -1020,7 +1018,7 @@ TEST_F_TEMP_DISABLED_ON_WINDOWS(OsTest, SYMLINK_Realpath)
   // Verify that the symlink resolves correctly.
   Result<string> resolved = os::realpath(testLink);
   ASSERT_SOME(resolved);
-  EXPECT_TRUE(strings::contains(resolved.get(), testFile));
+  EXPECT_TRUE(strings::contains(resolved.get(), testLink));
 
   // Verify that the file itself resolves correctly.
   resolved = os::realpath(testFile);

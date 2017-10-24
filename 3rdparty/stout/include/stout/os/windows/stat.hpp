@@ -109,7 +109,7 @@ inline Try<Bytes> size(
       if (symlink.isError()) {
         return Error(symlink.error());
       } else {
-        return Bytes(symlink.get().substitute_name.length());
+        return Bytes(symlink.get().print_name.length());
       }
       break;
     }

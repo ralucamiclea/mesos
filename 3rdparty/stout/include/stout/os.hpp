@@ -117,7 +117,7 @@ constexpr const char* ldPathEnvironmentVariable =
 #ifdef __APPLE__
     "DYLD_LIBRARY_PATH";
 #elif defined(__WINDOWS__)
-    "";
+    "PATH";
 #else
     "LD_LIBRARY_PATH";
 #endif
